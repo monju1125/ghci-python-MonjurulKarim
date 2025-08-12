@@ -1,3 +1,5 @@
+#This File is Edited 
+
 # GHCI Python Starter (FastAPI + pytest)
 
 This is a tiny sample repo for **Session 1: AI‑Assisted GitHub & CI**.
