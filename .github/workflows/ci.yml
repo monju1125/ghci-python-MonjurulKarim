@@ -1,0 +1,62 @@
+# -------------------------------------------------------------------
+# Continuous Integration (CI) workflow for this repository.
+# Save this file at: .github/workflows/ci.yml
+#
+# What it does (plain English):
+# • Whenever you push to the "main" branch or open a Pull Request into "main",
+#   GitHub runs this workflow on a clean Linux VM.
+# • It checks out your code, sets up Python, installs dependencies, and runs tests.
+# • Green check = tests passed. Red X = tests failed (you'll get logs to debug).
+# -------------------------------------------------------------------
+
+name: CI  # Friendly name that appears in the Actions/PR UI
+
+# WHEN to run this workflow
+on:
+  push:
+    branches: ["main"]        # Run on pushes to the main branch
+  pull_request:
+    branches: ["main"]        # Run on PRs that target the main branch
+
+# WHAT jobs to run (we keep it to a single job for beginners)
+jobs:
+  test:
+    name: Run tests on Ubuntu with Python 3.11  # Shown in the UI
+
+    # The machine image (a fresh Linux runner)
+    runs-on: ubuntu-latest
+
+    # The step-by-step recipe
+    steps:
+      # 1) Download the repository code onto the runner
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # 2) Install the version of Python your project uses
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"  # Change here if you need a different version
+
+      # 3) Install dependencies so tests can import and run
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 4) Run the test suite with pytest
+      #    - The PYTHONPATH line adds the repo root to Python's module search path
+      #      so imports like "from app.main import app" work on CI.
+      #    - "-q" tells pytest to be quiet so logs are easier to scan.
+      - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}   # Make "app/" importable on the runner
+        run: pytest -q
+
+# -------------------------------------------------------------------
+# Tips:
+# • YAML is space-sensitive. Keep indentation exactly as shown (spaces, not tabs).
+# • To trigger a run: open a PR or push a commit to a branch that targets "main".
+# • View logs: PR page → "Checks" → click into the failing job → see first red section.
+# • If you see "ModuleNotFoundError: app", ensure you have "app/__init__.py" in the repo,
+#   and keep the PYTHONPATH line above.
+# • To run on ALL branches, change branches: ["**"] under both push and pull_request.
+# -------------------------------------------------------------------
